@@ -5,6 +5,9 @@ using Microsoft.OpenApi;
 using MyApp.API.Middleware;
 using MyApp.API.OpenApi;
 using MyApp.Application;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using MyApp.API.HealthChecks;
 using MyApp.Infrastructure;
 using MyApp.Infrastructure.Persistence;
 using Scalar.AspNetCore;
@@ -67,6 +70,9 @@ builder.Services.AddOpenApi(options =>
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<AppDbContext>(name: "database", tags: ["ready"]);
+
 var app = builder.Build();
 
 await DatabaseInitializer.InitializeAsync(app.Services);
@@ -86,6 +92,19 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
 app.MapControllers();
+
+// Liveness — is the process running?
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = _ => false   // skip all checks; 200 means the process is alive
+}).AllowAnonymous().DisableRateLimiting();
+
+// Readiness — is the app ready to serve traffic (DB reachable)?
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready"),
+    ResponseWriter = HealthCheckResponseWriter.WriteDetailedJson
+}).AllowAnonymous().DisableRateLimiting();
 
 app.Run();
 
