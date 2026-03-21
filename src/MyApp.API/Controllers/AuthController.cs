@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using MyApp.Application.Features.Auth;
 using MyApp.Application.Features.Auth.Commands.Login;
 using MyApp.Application.Features.Auth.Commands.RefreshToken;
@@ -14,6 +15,7 @@ namespace MyApp.API.Controllers;
 [Route("api/[controller]")]
 [Tags("Auth")]
 [Produces("application/json")]
+[EnableRateLimiting("auth")]
 public class AuthController : ControllerBase
 {
     private readonly IMediator _mediator;

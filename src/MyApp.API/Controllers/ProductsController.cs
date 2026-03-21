@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using MyApp.Application.Features.Products.Commands.CreateProduct;
 using MyApp.Application.Features.Products.Commands.DeleteProduct;
 using MyApp.Application.Features.Products.Commands.UpdateProduct;
@@ -14,6 +15,7 @@ namespace MyApp.API.Controllers;
 [Route("api/[controller]")]
 [Tags("Products")]
 [Produces("application/json")]
+[EnableRateLimiting("api")]
 public class ProductsController : ControllerBase
 {
     private readonly IMediator _mediator;
