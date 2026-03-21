@@ -18,6 +18,8 @@ A production-ready **.NET 10 Web API** boilerplate using **Clean Architecture**,
 | Authentication | JWT Bearer + Refresh Tokens |
 | Password Hashing | BCrypt.Net |
 | API Docs | Scalar (OpenAPI) |
+| Rate Limiting | ASP.NET Core built-in (fixed + sliding window) |
+| Health Checks | ASP.NET Core + EF Core DbContext probe |
 | Unit Tests | xUnit + Moq + FluentAssertions |
 | Integration Tests | WebApplicationFactory + SQLite |
 | CI/CD | GitHub Actions + GHCR |
@@ -108,12 +110,12 @@ JwtSettings__SecretKey=my-super-secret-key
 
 ### Auth
 
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `POST` | `/api/auth/register` | — | Register a new user |
-| `POST` | `/api/auth/login` | — | Login, receive tokens |
-| `POST` | `/api/auth/refresh` | — | Rotate refresh token |
-| `POST` | `/api/auth/revoke` | Bearer | Revoke refresh token (logout) |
+| Method | Endpoint | Auth | Rate limit | Description |
+|---|---|---|---|---|
+| `POST` | `/api/auth/register` | — | 10 req/min | Register a new user |
+| `POST` | `/api/auth/login` | — | 10 req/min | Login, receive tokens |
+| `POST` | `/api/auth/refresh` | — | 10 req/min | Rotate refresh token |
+| `POST` | `/api/auth/revoke` | Bearer | 10 req/min | Revoke refresh token (logout) |
 
 **Register / Login response:**
 ```json
@@ -128,13 +130,44 @@ JwtSettings__SecretKey=my-super-secret-key
 
 ### Products (requires `Authorization: Bearer <token>`)
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/products` | List all products |
-| `GET` | `/api/products/{id}` | Get product by ID |
-| `POST` | `/api/products` | Create product |
-| `PUT` | `/api/products/{id}` | Update product |
-| `DELETE` | `/api/products/{id}` | Delete product |
+| Method | Endpoint | Rate limit | Description |
+|---|---|---|---|
+| `GET` | `/api/products` | 60 req/min | List all products |
+| `GET` | `/api/products/{id}` | 60 req/min | Get product by ID |
+| `POST` | `/api/products` | 60 req/min | Create product |
+| `PUT` | `/api/products/{id}` | 60 req/min | Update product |
+| `DELETE` | `/api/products/{id}` | 60 req/min | Delete product |
+
+### Health
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `GET` | `/health/live` | — | Liveness — returns `200` if the process is up |
+| `GET` | `/health/ready` | — | Readiness — checks DB connectivity, returns JSON |
+
+**Readiness response:**
+```json
+{
+  "status": "Healthy",
+  "duration": "00:00:00.012",
+  "checks": [
+    { "name": "database", "status": "Healthy", "duration": "00:00:00.011", "description": null, "error": null }
+  ]
+}
+```
+
+Returns `HTTP 200` when healthy, `HTTP 503` when unhealthy.
+
+---
+
+## Rate Limiting
+
+| Policy | Endpoints | Algorithm | Limit | Partition |
+|---|---|---|---|---|
+| `auth` | `/api/auth/*` | Fixed window | 10 req / min | Remote IP |
+| `api` | `/api/products/*` | Sliding window | 60 req / min | User ID (JWT) or IP |
+
+Exceeded requests receive `HTTP 429 Too Many Requests`.
 
 ---
 
@@ -236,7 +269,9 @@ MyApp/
 │   │   └── Services/           # JwtTokenService, PasswordHasher
 │   └── MyApp.API/
 │       ├── Controllers/        # AuthController, ProductsController
+│       ├── HealthChecks/       # HealthCheckResponseWriter
 │       ├── Middleware/         # ExceptionHandlingMiddleware
+│       ├── OpenApi/            # BearerSecuritySchemeTransformer
 │       └── Program.cs
 ├── tests/
 │   ├── MyApp.Domain.Tests/
