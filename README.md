@@ -18,6 +18,7 @@ A production-ready **.NET 10 Web API** boilerplate using **Clean Architecture**,
 | Authentication | JWT Bearer + Refresh Tokens |
 | Password Hashing | BCrypt.Net |
 | API Docs | Scalar (OpenAPI) |
+| Logging | Serilog (structured JSON + rolling file) |
 | Rate Limiting | ASP.NET Core built-in (fixed + sliding window) |
 | Health Checks | ASP.NET Core + EF Core DbContext probe |
 | Unit Tests | xUnit + Moq + FluentAssertions |
@@ -157,6 +158,25 @@ JwtSettings__SecretKey=my-super-secret-key
 ```
 
 Returns `HTTP 200` when healthy, `HTTP 503` when unhealthy.
+
+---
+
+## Logging
+
+Structured logging via [Serilog](https://serilog.net/). Every request is logged with method, path, status code, elapsed time, and authenticated user ID.
+
+| | Development | Production |
+|---|---|---|
+| Console format | Human-readable text | Compact JSON (CLEF) |
+| File output | — | `logs/myapp-YYYYMMDD.log`, 14-day retention |
+| Min level | `Debug` | `Information` |
+| EF Core SQL | `Information` | `Warning` |
+
+Each log entry is enriched with `MachineName` and `ProcessId`. Override log levels via environment variables:
+
+```bash
+Serilog__MinimumLevel__Default=Warning
+```
 
 ---
 
