@@ -75,7 +75,7 @@ try
             document.Info.Title = "MyApp API";
             document.Info.Version = "v1";
             document.Info.Description =
-                "Production-ready .NET 10 Web API — Clean Architecture· CQRS · JWT Auth.";
+                "Production-ready .NET 10 Web API — Clean Architectures· CQRS · JWT Auth.";
             return Task.CompletedTask;
         });
         options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
