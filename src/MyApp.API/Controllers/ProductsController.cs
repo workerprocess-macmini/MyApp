@@ -19,8 +19,6 @@ namespace MyApp.API.Controllers;
 public class ProductsController : ControllerBase
 {
     private readonly IMediator _mediator;
-    private int y;
-
     public ProductsController(IMediator mediator) => _mediator = mediator;
 
     /// <summary>Return all products.</summary>
