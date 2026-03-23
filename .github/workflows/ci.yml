@@ -46,12 +46,12 @@ jobs:
             --logger "trx;LogFileName=application-tests.trx" \
             --logger "console;verbosity=normal"
 
-      # - name: Integration tests
-      #   run: |
-      #     dotnet test tests/MyApp.IntegrationTests \
-      #       --no-build --configuration Release \
-      #       --logger "trx;LogFileName=integration-tests.trx" \
-      #       --logger "console;verbosity=normal"
+      - name: Integration tests
+        run: |
+          dotnet test tests/MyApp.IntegrationTests \
+            --no-build --configuration Release \
+            --logger "trx;LogFileName=integration-tests.trx" \
+            --logger "console;verbosity=normal"
 
       - name: Publish test results
         uses: dorny/test-reporter@v1
