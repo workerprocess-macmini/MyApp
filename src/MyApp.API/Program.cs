@@ -104,18 +104,21 @@ try
         });
     }
 
-    // Log every HTTP request/response (method, path, status, elapsed).
-    app.UseSerilogRequestLogging(options =>
+    if (!builder.Environment.IsEnvironment("IntegrationTest"))
     {
-        options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+        // Log every HTTP request/response (method, path, status, elapsed).
+        app.UseSerilogRequestLogging(options =>
         {
-            diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
-            diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
-            diagnosticContext.Set("UserAgent", httpContext.Request.Headers.UserAgent.ToString());
-            var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId is not null) diagnosticContext.Set("UserId", userId);
-        };
-    });
+            options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+            {
+                diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
+                diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
+                diagnosticContext.Set("UserAgent", httpContext.Request.Headers.UserAgent.ToString());
+                var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userId is not null) diagnosticContext.Set("UserId", userId);
+            };
+        });
+    }
 
     app.UseMiddleware<ExceptionHandlingMiddleware>();
     app.UseHttpsRedirection();
