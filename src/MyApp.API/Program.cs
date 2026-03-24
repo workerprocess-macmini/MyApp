@@ -118,7 +118,10 @@ try
     app.UseHttpsRedirection();
     app.UseAuthentication();
     app.UseAuthorization();
-    app.UseRateLimiter();
+    if (!app.Environment.IsEnvironment("IntegrationTest"))
+    {
+        app.UseRateLimiter();
+    }
     app.MapControllers();
 
     // Liveness — is the process running?
