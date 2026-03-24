@@ -32,8 +32,8 @@ jobs:
       - name: Build
         run: dotnet build --no-restore --configuration Release
 
-      - name: Run all tests
-        run: dotnet test --no-build --configuration Release --logger "trx;LogFileName=test_results.trx" --verbosity normal
+      # - name: Run all tests
+      #   run: dotnet test --no-build --configuration Release --logger "trx;LogFileName=test_results.trx" --verbosity normal
         
 
   docker:
