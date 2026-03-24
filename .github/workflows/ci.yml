@@ -1,10 +1,10 @@
 name: CI
 
 on:
-  push:
-    branches: [Develop]
+  # push:
+  #   branches: [master,Develop]
   pull_request:
-    branches: [Develop]
+    branches: [master,Develop]
     
 permissions:
   checks: write
