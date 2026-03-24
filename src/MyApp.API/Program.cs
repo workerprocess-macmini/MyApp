@@ -24,12 +24,15 @@ try
 
     var builder = WebApplication.CreateBuilder(args);
 
-    builder.Host.UseSerilog((context, services, config) => config
-        .ReadFrom.Configuration(context.Configuration)
-        .ReadFrom.Services(services)
-        .Enrich.FromLogContext()
-        .Enrich.WithMachineName()
-        .Enrich.WithProcessId());
+    if (!builder.Environment.IsEnvironment("IntegrationTest"))
+    {
+        builder.Host.UseSerilog((context, services, config) => config
+            .ReadFrom.Configuration(context.Configuration)
+            .ReadFrom.Services(services)
+            .Enrich.FromLogContext()
+            .Enrich.WithMachineName()
+            .Enrich.WithProcessId());
+    }
 
     builder.Services.AddControllers();
 
