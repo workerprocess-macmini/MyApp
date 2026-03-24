@@ -7,7 +7,7 @@ A production-ready **.NET 10 Web API** boilerplate using **Clean Architecture**,
 
 ---
 
-## Tech Stack
+## Tech Stack change
 
 | Layer | Technology |
 |---|---|
